@@ -6,6 +6,11 @@ using System.Text;
 using System.Globalization;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
+using System.Net.Mail;
+using System.Configuration;
+using System.Collections.Specialized;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace StockQuoteAlert
 {
@@ -40,6 +45,9 @@ namespace StockQuoteAlert
                 .Wait();
                 Thread.Sleep(180000);
             }
+
+            Console.Write("Pressione qualquer tecla para fechar o app");
+            Console.ReadKey();
         }
 
         // Função assíncrona que busca o preço do ativo desejado e 
@@ -75,6 +83,34 @@ namespace StockQuoteAlert
         // Função de enviar email que ainda será feita
         static async Task SendWarnEmail(bool maior, string ativ, double min, double max, string endEmail)
         {
+            using (MailMessage mail = new MailMessage())
+            {
+
+                mail.From = new MailAddress("eduardocanova23@outlook.com");
+                mail.To.Add(endEmail);
+
+                if (maior)
+                {
+                    mail.Subject = "Irmão, teu ativo tá maior que o limite!!";
+                    mail.Body = "<h1>Aí chefe, seu ativo " + ativ + " ultrapassou aquele teu limite superior de "+ max +" reais, fica ligado ai</h1>";
+                }
+                else
+                {
+                    mail.Subject = "Irmão, teu ativo tá menor que o limite!!";
+                    mail.Body = "<h1>Aí chefe, seu ativo " + ativ + " está abaixo daquele teu limite inferior de "+ min +" reais, fica ligado ai</h1>";
+                }
+
+                mail.IsBodyHtml = true;
+
+                using (SmtpClient smtp = new SmtpClient("smtp-mail.outlook.com", 25))
+                {
+                    // O código lê o arquivo de configuração com as variáveis de email e senha
+                    string adress = ConfigurationManager.AppSettings.Get("EmailAdress");
+                    string password = ConfigurationManager.AppSettings.Get("password");
+                    smtp.Credentials = new System.Net.NetworkCredential(adress, password);
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
+                }
                 Console.WriteLine("mandei o email teoricamente");
             
         }
