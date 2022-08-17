@@ -12,12 +12,14 @@ using System.Collections.Specialized;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
+using API_Library;
+using System.Runtime.CompilerServices;
 
 namespace StockQuoteAlert
 {
     class Program
     {
-        static void Main(string[] args)
+        static async void Main(string[] args)
         {
             Console.WriteLine("Bem-Vindo(a) ao monitoramento de ativos Stock Quote Alert");
             Console.WriteLine("------------------------------------------------------");
@@ -79,14 +81,16 @@ namespace StockQuoteAlert
             } while (correto is false);
 
 
+            // Inicializa o cliente através da classe Helper da API
+            ApiHelper.InitializeClient();
 
             while (true)
             {
-                JObject json = JObject.Parse(CallWebAPI(ativ, min, max));
+                // A função retira os dados do JSON para podermos armazenar na variavel price
+                //var stock = await StockProcessor.LoadStock(ativ);
+                //double price = stock.Price;
 
-                // Extração do preço do objeto json que foi retornado pela API
-                double price = Convert.ToDouble(json["results"][ativ.ToUpper()]["price"].ToString());
-
+                double price = 12;
                 // Comparar os valores dos preços e tomar a decisão de qual email enviar
                 // Booleano usado para fazer com que a função que envia o email saiba construir o corpo do email de acordo
                 // com o preço do ativo. Se o ativo está acima do limite, maior = true, e se o ativo está abaixo do limite
@@ -105,7 +109,7 @@ namespace StockQuoteAlert
                     Console.WriteLine("Parece que seu ativo está acima do limite superior, e agora está valendo R$"+price+". " +
                         "Cheque sua caixa de entrada no email informado");
                 }
-                Thread.Sleep(180000);
+                Thread.Sleep(120000);
             }
 
             Console.Write("Pressione qualquer tecla para fechar o app");
@@ -132,7 +136,7 @@ namespace StockQuoteAlert
                     }
                     else
                     {
-                        throw new InvalidAPICall("Algo que foi inserido na chamada da API não está certo");
+                        throw new InvalidAPICall("Não obtivemos uma resposta da Web... Tente novamente");
                         return "Erro";
                     }
 
@@ -201,13 +205,17 @@ namespace StockQuoteAlert
 
         }
 
+        private async Task LoadPrice(string ativ)
+        {
+            var stock = await StockProcessor.LoadStock(ativ);
+            Console.WriteLine(stock.Price);
+        }
+
         // Fazer tratamento de erro de código de ativo inválido
-        // Passar parâmetros por referência ao invés de passar várias variáveis em cada função
         // Fazer com que o email diga qual é o valor atual do ativo
         // Tratar erros de API e de conexão
         // Tratar erros de credencial e email inválido
         // Maneira melhor de configurar o server SMTP?
-        // Organizar melhor e dividir tarefas nas funções da api e de envio de email
 
         [Serializable]
         private class IndexOutOfRange : Exception
