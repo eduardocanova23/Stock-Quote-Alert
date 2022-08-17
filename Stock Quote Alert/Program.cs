@@ -64,30 +64,7 @@ namespace StockQuoteAlert
 
             while (true)
             {
-                CallWebAPIAsync(ativ, min, max, endEmail)
-                .Wait();
-                Thread.Sleep(180000);
-            }
-
-            Console.Write("Pressione qualquer tecla para fechar o app");
-            Console.ReadKey();
-        }
-
-        // Função assíncrona que busca o preço do ativo desejado e 
-        static async Task CallWebAPIAsync(string ativ, double min, double max, string endEmail)
-        {
-            using (var client = new HttpClient())
-            {
-                // Construção da URL de chamada da API
-                string url = "https://api.hgbrasil.com/finance/stock_price?key=32016adc&symbol="+ ativ;
-
-
-                // Definindo cliente http para o receber os dados em JSON fornecido pela api
-                var myClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
-                var response = await myClient.GetAsync(url);
-                string jstring = await response.Content.ReadAsStringAsync();
-
-                JObject json = JObject.Parse(jstring);
+                JObject json = JObject.Parse(CallWebAPI(ativ, min, max));
 
                 // Extração do preço do objeto json que foi retornado pela API
                 double price = Convert.ToDouble(json["results"][ativ.ToUpper()]["price"].ToString());
@@ -110,9 +87,45 @@ namespace StockQuoteAlert
                     Console.WriteLine("Parece que seu ativo está acima do limite superior, e agora está valendo R$"+price+". " +
                         "Cheque sua caixa de entrada no email informado");
                 }
-                //Console.WriteLine(httpResponse.StatusCode);
+                Thread.Sleep(180000);
             }
+
+            Console.Write("Pressione qualquer tecla para fechar o app");
+            Console.ReadKey();
+
+            // Função que chama a API e aguarda resposta HTTP
+            string CallWebAPI(string ativ, double min, double max)
+            {
+                using (var client = new HttpClient())
+                {
+                    // Construção da URL de chamada da API
+                    string url = "https://api.hgbrasil.com/finance/stock_price?key=32016adc&symbol="+ ativ;
+
+
+                    // Definindo cliente http para o receber os dados em JSON fornecido pela api
+                    var myClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
+
+
+                    var response = client.GetAsync(url).GetAwaiter().GetResult();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = response.Content;
+                        return responseContent.ReadAsStringAsync().GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        throw new InvalidAPICall("Algo que foi inserido na chamada da API não está certo");
+                        return "Erro";
+                    }
+
+                    
+                    //Console.WriteLine(httpResponse.StatusCode);
+                }
+            }
+
         }
+
+        
 
         // Função de enviar email que ainda será feita
         static async Task SendWarnEmail(bool maior, string ativ, double min, double max, string endEmail)
