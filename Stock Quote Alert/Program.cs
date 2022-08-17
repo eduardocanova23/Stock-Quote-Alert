@@ -78,11 +78,11 @@ namespace StockQuoteAlert
                 }
             } while (correto is false);
 
-
+             
 
             while (true)
             {
-                JObject json = JObject.Parse(CallWebAPI(ativ, min, max));
+                JObject json = JObject.Parse(ApiHelper.Instance.CallWebAPI(ativ, min, max));
 
                 // Extração do preço do objeto json que foi retornado pela API
                 double price = Convert.ToDouble(json["results"][ativ.ToUpper()]["price"].ToString());
@@ -110,36 +110,6 @@ namespace StockQuoteAlert
 
             Console.Write("Pressione qualquer tecla para fechar o app");
             Console.ReadKey();
-
-            // Função que chama a API e aguarda resposta HTTP
-            string CallWebAPI(string ativ, double min, double max)
-            {
-                using (var client = new HttpClient())
-                {
-                    // Construção da URL de chamada da API
-                    string url = "https://api.hgbrasil.com/finance/stock_price?key=32016adc&symbol="+ ativ;
-
-
-                    // Definindo cliente http para o receber os dados em JSON fornecido pela api
-                    var myClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
-
-
-                    var response = client.GetAsync(url).GetAwaiter().GetResult();
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var responseContent = response.Content;
-                        return responseContent.ReadAsStringAsync().GetAwaiter().GetResult();
-                    }
-                    else
-                    {
-                        throw new InvalidAPICall("Algo que foi inserido na chamada da API não está certo");
-                        return "Erro";
-                    }
-
-                    
-                    //Console.WriteLine(httpResponse.StatusCode);
-                }
-            }
 
             bool IsValidEmail(string email)
             {
