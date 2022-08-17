@@ -30,6 +30,16 @@ namespace StockQuoteAlert
 
             Console.WriteLine("Vou monitorar o ativo {0} e te mandar um email se a cotação desse ativo ficar abaixo de {1} reais," +
                 " ou se ele ficar acima de {2} reais", ativ, min, max);
+
+            Console.WriteLine("Por favor, insira o email que receberá os avisos");
+            string endEmail = Console.ReadLine();
+
+            while (true)
+            {
+                CallWebAPIAsync(ativ, min, max, endEmail)
+                .Wait();
+                Thread.Sleep(180000);
+            }
         }
 
         // Função assíncrona que busca o preço do ativo desejado e 
