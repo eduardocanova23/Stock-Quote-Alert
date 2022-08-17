@@ -60,7 +60,25 @@ namespace StockQuoteAlert
                 " ou se ele ficar acima de {2} reais", ativ, min, max);
 
             Console.WriteLine("Por favor, insira o email que receberá os avisos");
-            string endEmail = Console.ReadLine();
+
+            // Identificar se o email inserido é válido, e continuar pedindo um input caso não seja
+            bool correto = false;
+            string endEmail;
+
+            do
+            {
+                endEmail = Console.ReadLine();
+                if (IsValidEmail(endEmail))
+                {
+                    correto = true;
+                }
+                else
+                {
+                    Console.WriteLine("Esse email é inválido, digite novamente: ");
+                }
+            } while (correto is false);
+
+
 
             while (true)
             {
@@ -120,6 +138,19 @@ namespace StockQuoteAlert
 
                     
                     //Console.WriteLine(httpResponse.StatusCode);
+                }
+            }
+
+            bool IsValidEmail(string email)
+            {
+                try
+                {
+                    var addr = new System.Net.Mail.MailAddress(email);
+                    return addr.Address == email;
+                }
+                catch
+                {
+                    return false;
                 }
             }
 
