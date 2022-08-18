@@ -14,6 +14,7 @@ namespace StockQuoteAlert
         // Private constructor so no one else can instantiate Foo
         private ApiHelper() { }
 
+        // Função que chama a API e retorna uma string com os dados obtidos
         public string CallWebAPI(string ativ, double min, double max)
         {
             using (var client = new HttpClient())

@@ -128,7 +128,7 @@ namespace StockQuoteAlert
 
         
 
-        // Função de enviar email que ainda será feita
+        // Função de enviar email 
         static async Task SendWarnEmail(bool maior, string ativ, double min, double max, string endEmail)
         {
             using (MailMessage mail = new MailMessage())
